@@ -14,14 +14,21 @@ task_categories:
 pretty_name: Chobits-Chii-Voice
 ---
 
-# Chobits-Chii-Voice
-
-[![Made with Love](https://img.shields.io/badge/Made%20with-Love-ff69b4.svg)](https://madewithlove.org.in)
-[![Hugging Face Dataset](https://img.shields.io/badge/%F0%9F%A4%97%20Dataset-Chobits--Chii--Voice-yellow)](https://huggingface.co/datasets/chenxin199305/Chobits-Chii-Voice)
-[![GitHub](https://img.shields.io/badge/GitHub-Chobits--Chii--Voice-181717?logo=github)](https://github.com/Anime2Real/Chobits-Chii-Voice)
-[![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
-[![Language: Japanese](https://img.shields.io/badge/Language-Japanese-green.svg)]()
-[![Python 3.12](https://img.shields.io/badge/Python-3.12-blue.svg)]()
+<div align="center">
+	<h1>Chobits</h1>
+	<p><b>叽～</b> 小叽的语音数据集</p>
+	<p>《人形电脑天使心》(Chobits) 小叽角色的日语语音数据集，可用于语音合成 (TTS)、声音克隆等任务的训练与微调。</p>
+	<p>
+		<a href="https://madewithlove.org.in"><img alt="Made with Love" src="https://img.shields.io/badge/Made%20with-Love-ff69b4.svg"></a>
+		<a href="https://github.com/Anime2Real/Chobits-Chii-Voice"><img alt="GitHub" src="https://img.shields.io/badge/GitHub-Chobits--Chii--Voice-181717?logo=github"></a>
+		<a href="https://huggingface.co/datasets/chenxin199305/Chobits-Chii-Voice"><img alt="Hugging Face Dataset" src="https://img.shields.io/badge/%F0%9F%A4%97%20Dataset-Chobits--Chii--Voice-yellow"></a>
+		<a href="https://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="License: CC BY-NC-SA 4.0" src="https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg"></a>
+	</p>
+	<p>
+		<img alt="Language: Japanese" src="https://img.shields.io/badge/Language-Japanese-green.svg" />
+		<img alt="Python 3.12" src="https://img.shields.io/badge/Python-3.12-blue.svg" />
+	</p>
+</div>
 
 > 💖 如果这个项目对你有帮助，欢迎在 [GitHub](https://github.com/Anime2Real/Chobits-Chii-Voice) 点个 Star、在 [Hugging Face](https://huggingface.co/datasets/chenxin199305/Chobits-Chii-Voice) 点个 Like —— 你的支持能让更多人发现小叽！
 
@@ -31,7 +38,7 @@ pretty_name: Chobits-Chii-Voice
 
 > ⚠️ 注意：原始动画音频的版权归其权利方所有。本数据集仅供学习与研究使用，请勿用于商业用途。
 
-## 数据统计
+## 📊 数据统计
 
 | 项目 | 数值 |
 | --- | --- |
@@ -42,7 +49,7 @@ pretty_name: Chobits-Chii-Voice
 | 语言 | 日语 |
 | 覆盖范围 | TV 全 24 话（跳过总集篇 8.5/16.5/24.5） |
 
-## 数据集结构
+## 🗂 数据集结构
 
 ```
 dataset/
@@ -60,7 +67,7 @@ dataset/
 - **命名规则**：`ep05_00667.42s.wav` 表示第 5 话、起始时间 667.42 秒，跨处理轮次稳定，便于溯源到原始音轨
 - **台词检索**：`transcripts.csv` 覆盖 24 话全部转写句子（OP/ED 已剔除），`grep 'ちい' dataset/transcripts.csv` 即可定位"哪一集第几秒说过某句话"；`chi_prob` 列为小叽分类概率（粗略区分说话人），`in_dataset` 标记该句是否有片段入选
 
-## 使用方法
+## 💻 使用方法
 
 ```python
 import csv
@@ -73,7 +80,9 @@ with open("dataset/metadata.csv", encoding="utf-8") as f:
         # ...
 ```
 
-## 数据处理流程
+## ⚙️ 数据处理流程
+
+> **小叽提示 (・ω・)ノ**：只是想使用数据集的话，看完上面的结构与使用方法就够啦；下面是完整的处理流程，适合想要复现或增量处理新剧集的你～
 
 全部代码见 `pipeline/` 目录，流程如下：
 
@@ -92,7 +101,7 @@ with open("dataset/metadata.csv", encoding="utf-8") as f:
 - 最终 487 段**全部经过人工听辨确认**为小叽单人语音，不含其他角色、混合人声或明显噪声段
 - 分类器仅用于挑选候选片段（精确率为历史轮次 5 折交叉验证实测约 91%；当前 `train_classifier.py` 以精确率 ≥0.95 为目标选阈值，运行时会打印实测精确率/召回率）；最终纯度由两轮人工标注 + 全量复听保证，不依赖分类器兜底
 
-## 仓库结构
+## 🗂 仓库结构
 
 ```
 Chobits-Chii-Voice/
@@ -158,7 +167,7 @@ AWS_CONFIG_FILE=$PWD/.dvc/aws_config dvc pull
 .venv/bin/python pipeline/finalize.py
 ```
 
-## 许可协议
+## 📄 许可协议
 
 本数据集以 [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh-hans)（署名-非商业性使用-相同方式共享）协议发布：
 
@@ -166,13 +175,13 @@ AWS_CONFIG_FILE=$PWD/.dvc/aws_config dvc pull
 - **非商业性使用 (NC)**：不得将本数据集用于商业目的。
 - **相同方式共享 (SA)**：基于本数据集的衍生作品须以相同协议发布。
 
-## 免责声明
+## ⚠️ 免责声明
 
 - 本数据集仅用于学术研究与个人学习，不构成对原作品版权的任何主张。
 - 使用本数据集训练的模型，其生成内容不得用于侵犯原作品及相关声优权益的用途。
 - 若权利方提出要求，本数据集将被下架。
 
-## 引用
+## 📖 引用
 
 如果您在研究中使用了本数据集，请引用：
 
