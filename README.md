@@ -18,12 +18,12 @@ pretty_name: Chobits-Chii-Voice
 
 [![Made with Love](https://img.shields.io/badge/Made%20with-Love-ff69b4.svg)](https://madewithlove.org.in)
 [![Hugging Face Dataset](https://img.shields.io/badge/%F0%9F%A4%97%20Dataset-Chobits--Chii--Voice-yellow)](https://huggingface.co/datasets/chenxin199305/Chobits-Chii-Voice)
-[![GitHub](https://img.shields.io/badge/GitHub-Chobits--Chii--Voice-181717?logo=github)](https://github.com/chenxin199305/Chobits-Chii-Voice)
+[![GitHub](https://img.shields.io/badge/GitHub-Chobits--Chii--Voice-181717?logo=github)](https://github.com/Anime2Real/Chobits-Chii-Voice)
 [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
 [![Language: Japanese](https://img.shields.io/badge/Language-Japanese-green.svg)]()
 [![Python 3.12](https://img.shields.io/badge/Python-3.12-blue.svg)]()
 
-> 💖 如果这个项目对你有帮助，欢迎在 [GitHub](https://github.com/chenxin199305/Chobits-Chii-Voice) 点个 Star、在 [Hugging Face](https://huggingface.co/datasets/chenxin199305/Chobits-Chii-Voice) 点个 Like —— 你的支持能让更多人发现小叽！
+> 💖 如果这个项目对你有帮助，欢迎在 [GitHub](https://github.com/Anime2Real/Chobits-Chii-Voice) 点个 Star、在 [Hugging Face](https://huggingface.co/datasets/chenxin199305/Chobits-Chii-Voice) 点个 Like —— 你的支持能让更多人发现小叽！
 
 《人形电脑天使心》(Chobits) 中 **小叽 (Chi / ちぃ)** 角色的语音数据集，可用于语音合成 (TTS)、声音克隆等任务的训练与微调。
 
@@ -54,6 +54,8 @@ dataset/
 └── transcripts.csv           # 全集台词索引 (8520 句): 集数,起止时间,文本,小叽概率,是否入选
 ```
 
+> 📦 **音频文件不随本仓库分发**：`dataset/wavs/` 被 git 忽略，请从 [Hugging Face 数据集页](https://huggingface.co/datasets/chenxin199305/Chobits-Chii-Voice) 下载 `wavs/` 放到 `dataset/` 下；`metadata.csv`、`metadata_full.csv`、`transcripts.csv` 已随仓库跟踪，可直接使用。
+
 - **标注格式**：`metadata.csv` 每行为 `文件名|文本`（GPT-SoVITS / VITS 等框架常用格式）
 - **命名规则**：`ep05_00667.42s.wav` 表示第 5 话、起始时间 667.42 秒，跨处理轮次稳定，便于溯源到原始音轨
 - **台词检索**：`transcripts.csv` 覆盖 24 话全部转写句子（OP/ED 已剔除），`grep 'ちい' dataset/transcripts.csv` 即可定位"哪一集第几秒说过某句话"；`chi_prob` 列为小叽分类概率（粗略区分说话人），`in_dataset` 标记该句是否有片段入选
@@ -83,16 +85,21 @@ with open("dataset/metadata.csv", encoding="utf-8") as f:
 6. **人工标注**：两轮交互式标注（`label_ui.py` 浏览器工具，快捷键打标），共 1150 条，覆盖分类器边界区与低分区抽查；最终导出前对全部收录片段人工复听一遍
 7. **导出**：能量谷修剪切边、统一转 22050Hz（`finalize.py`）
 
+数据一致性校验：`python tools/validate.py`（CI 已接入）会对 `dataset/` 与 `annotations/labels.json` 做结构断言（两表文件集合/行数一致、标签覆盖与合法性、字段与内容寻址命名、transcripts 24 话覆盖与 `in_dataset` 互查，失败即非零退出），并将实测片段数/总时长/标签数与 README 声明比对（不符仅警告）。
+
 ### 纯度说明
 
 - 最终 487 段**全部经过人工听辨确认**为小叽单人语音，不含其他角色、混合人声或明显噪声段
-- 分类器仅用于挑选候选片段（交叉验证精确率约 91%）；最终纯度由两轮人工标注 + 全量复听保证，不依赖分类器兜底
+- 分类器仅用于挑选候选片段（精确率为历史轮次 5 折交叉验证实测约 91%；当前 `train_classifier.py` 以精确率 ≥0.95 为目标选阈值，运行时会打印实测精确率/召回率）；最终纯度由两轮人工标注 + 全量复听保证，不依赖分类器兜底
 
 ## 仓库结构
 
 ```
 Chobits-Chii-Voice/
 ├── README.md               # 本文件 (数据集卡片)
+├── requirements.txt        # pipeline 依赖锁定 (Python 3.12, 仅 macOS Apple Silicon)
+├── tests/                  # metadata_schema / validate 单元测试 (纯标准库 unittest)
+├── tools/                  # 数据一致性校验 validate.py (纯标准库, CI 接入)
 ├── dataset/                # 最终数据集 (见上)
 ├── annotations/            # 人工标注资产
 │   ├── labels.json             # 1150 条人工标签 {文件名: chi/not_chi/mixed/bad/unsure}
@@ -103,15 +110,15 @@ Chobits-Chii-Voice/
 │   ├── chi_reference_v5.npy    # 小叽参考向量 (确认样本均值)
 │   └── legacy/                 # 历史参考向量与中间统计
 ├── pipeline/               # 处理流水线代码
-│   ├── batch.py                # 抽轨 / 人声分离 / 转写 (幂等, 产物缓存在 build/)
+│   ├── batch.py                # 抽轨 / 人声分离 / 转写 / 候选切分 (幂等, 产物在 build/, 不写 dataset/)
 │   ├── common.py               # chunk 生成与嵌入缓存
 │   ├── audio_utils.py          # 静音判定 / 词级拆分 / 能量谷切分与修剪
-│   ├── prepare_labeling.py     # 按分类器概率挑选待标注片段
+│   ├── prepare_labeling.py     # 按分类器概率挑选待标注片段 (清单入 annotations/, wav 入 build/)
 │   ├── label_ui.py             # 浏览器标注工具 (快捷键, 实时落盘)
 │   ├── embed_human_labels.py   # 标注片段嵌入
 │   ├── train_classifier.py     # 训练分类器 + 交叉验证选阈值
-│   ├── finalize.py             # 最终导出
-│   ├── build_transcript_index.py  # 生成全集台词索引 transcripts.csv
+│   ├── finalize.py             # 最终导出 (dataset/ 的唯一写入入口)
+│   ├── build_transcript_index.py  # 生成全集台词索引到 build/ (finalize 发布到 dataset/)
 │   └── legacy/                 # 历史迭代脚本 (round2-round8 等, 仅供考古)
 ├── Chobits_Movie.dvc       # 原始视频 (DVC, 存储于腾讯云 COS)
 └── build/                  # 中间产物缓存 (不入库, 可由 pipeline 重新生成)
@@ -119,19 +126,35 @@ Chobits-Chii-Voice/
 
 ### 复现/增量处理
 
+> ⚠️ 流水线**仅支持 macOS (Apple Silicon)**：Whisper 转写依赖 MLX（仅提供 arm64 wheel），
+> Demucs 默认用 `mps` 设备。ffmpeg 静态二进制由 `imageio-ffmpeg` 提供，也可自备 ffmpeg（加入 `PATH` 即可）。
+
 ```bash
-# 环境: Python 3.12, 依赖见 import (torch, demucs, mlx-whisper, speechbrain, ...)
+# 0. 环境: Python 3.12 + 依赖锁定 (见 requirements.txt)
+python3.12 -m venv .venv
+.venv/bin/pip install -r requirements.txt
 
 # 1. 原始视频 (需配置 COS 凭据, 见 .dvc/config.local; COS 要求 virtual-host 寻址, 通过 .dvc/aws_config 指定)
 AWS_CONFIG_FILE=$PWD/.dvc/aws_config dvc pull
-# 2. 抽轨 + 分离 + 转写 (幂等, 增量处理新剧集)
+
+# 2. 抽轨 + 人声分离 + 转写 + 候选切分 (幂等, 增量处理新剧集)
+#    产物全部写 build/ 暂存区 (含 build/metadata_full.csv 候选总表、build/epXX/kept.json),
+#    不触碰 dataset/; demucs 设备可用 CHII_VOICE_DEVICE 覆盖 (默认 mps)
 .venv/bin/python pipeline/batch.py
-# 3. 人工标注循环
-.venv/bin/python pipeline/prepare_labeling.py   # 生成待标注清单
-.venv/bin/python pipeline/label_ui.py           # 浏览器标注
+
+# 3. 人工标注循环 (annotations/labels.json 与 clips.json 已随仓库跟踪,
+#    已标注片段自动跳过, 可随时中断续标)
+.venv/bin/python pipeline/prepare_labeling.py   # 生成待标注清单 (B/C 组 wav 在 build/labeling/clips/)
+.venv/bin/python pipeline/label_ui.py           # 浏览器标注, 标签实时落盘 annotations/labels.json
 .venv/bin/python pipeline/embed_human_labels.py # 嵌入新标注
 .venv/bin/python pipeline/train_classifier.py   # 重训分类器
-# 4. 最终导出
+
+# 4. 全集台词索引 -> build/transcripts.csv
+.venv/bin/python pipeline/build_transcript_index.py
+
+# 5. 最终导出: 读 annotations/labels.json + build/ 中间产物,
+#    原子写出 dataset/wavs/ + metadata.csv + metadata_full.csv (+ transcripts.csv)
+#    dataset/ 下正式文件只由本步产出
 .venv/bin/python pipeline/finalize.py
 ```
 

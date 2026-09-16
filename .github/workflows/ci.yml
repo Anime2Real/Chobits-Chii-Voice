@@ -1,0 +1,32 @@
+name: CI
+
+# 暂时停用自动触发（2026-09）：快速迭代期 push 频繁，为节省 Actions 费用。
+# 手动运行：仓库页 Actions → CI → Run workflow。
+# 恢复自动检查：把下面改为
+#   on:
+#     push: { branches: [main] }
+#     pull_request: { branches: [main] }
+on: workflow_dispatch
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Compile pipeline modules
+        run: python -m py_compile pipeline/*.py
+      - name: Run tests
+        run: python -m unittest discover -s tests -v
+      - name: Validate dataset consistency
+        run: python tools/validate.py

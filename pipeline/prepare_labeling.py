@@ -2,17 +2,20 @@
 """准备人工标注数据: 用 LR 分类器概率挑选待标注片段, 生成标注清单.
 
 三组数据 (均跳过 labels.json 中已有标签的片段):
-  A = dataset/wavs/ 已收录的片段 (复核纯度)
+  A = build/candidates|review 已收录的片段 (复核纯度)
   B = prob 在 [B_LO, 收录阈值) 的边界片段 (分类器最纠结的区域)
   C = prob 在 [C_LO, B_LO) 的随机抽查 (验证更低分区是否漏掉小叽)
 
-产出:
-  dataset/labeling/clips/     B/C 组片段 wav (22050Hz, 命名内容寻址)
-  annotations/clips.json     标注清单 (label_ui.py 读取)
+读取:
+  build/metadata_full.csv      batch.py 产出的候选+复核总表 (metadata_schema 格式)
+  build/epXX/kept.json         句段缓存 (batch.py 产出)
+
+产出 (均为可再生中间产物):
+  build/labeling/clips/        B/C 组片段 wav (22050Hz, 命名内容寻址)
+  annotations/clips.json       标注清单 (label_ui.py 读取)
 
 用法: .venv/bin/python pipeline/prepare_labeling.py
 """
-import csv
 import json
 import os
 import pickle
@@ -24,18 +27,18 @@ from scipy.signal import resample_poly
 from speechbrain.inference.speaker import EncoderClassifier
 
 import batch
+import metadata_schema as ms
 from common import get_chunks, get_embeddings
 from audio_utils import cut_trim, is_quiet
 
 MIN_DUR, MAX_DUR = 1.0, 10.0
 B_LO = 0.45                     # B 组: prob 在 [B_LO, 收录阈值)
 C_LO, C_PER_EP = 0.25, 2        # C 组: prob 在 [C_LO, B_LO), 每集抽查数
-LAB_DIR = os.path.join(batch.OUT_DIR, "labeling")
+LAB_DIR = os.path.join(batch.BUILD_DIR, "labeling")
 CLIPS_DIR = os.path.join(LAB_DIR, "clips")
 
-
-def clip_name(label, start):
-    return f"{batch.ep_dir_name(label)}_{start:08.2f}s"
+ep_dir_name = ms.ep_dir_name
+clip_name = ms.clip_name
 
 
 def overlap(a_start, a_end, b_start, b_end):
@@ -46,7 +49,7 @@ def overlap(a_start, a_end, b_start, b_end):
 def main():
     os.makedirs(CLIPS_DIR, exist_ok=True)
 
-    # A 组: 已收录片段, 从 metadata_full.csv 读分数
+    # A 组: 已收录候选/复核片段, 从 build/metadata_full.csv 读分数
     # 已标注的文件不再出现在清单中 (标签已是定论)
     labels_path = os.path.join("annotations", "labels.json")
     labeled = set()
@@ -58,18 +61,20 @@ def main():
         scorer = pickle.load(f)
     clf, thr = scorer["model"], scorer["threshold"]
 
+    meta_path = os.path.join(batch.BUILD_DIR, "metadata_full.csv")
+    if not os.path.exists(meta_path):
+        raise SystemExit(f"找不到 {meta_path}, 请先运行: .venv/bin/python pipeline/batch.py")
     exported, group_a = {}, []
-    with open(os.path.join(batch.OUT_DIR, "metadata_full.csv"), encoding="utf-8") as f:
-        for r in csv.DictReader(f):
-            exported.setdefault(r["ep"], []).append((float(r["start"]), float(r["end"])))
-            if r["file"] in labeled:
-                continue
-            group_a.append({
-                "file": r["file"], "src": "wavs", "group": "A",
-                "ep": r["ep"], "start": float(r["start"]), "end": float(r["end"]),
-                "dur": round(float(r["end"]) - float(r["start"]), 2),
-                "prob": float(r["prob"]), "text": r["text"],
-            })
+    for r in ms.read_metadata_full(meta_path):
+        exported.setdefault(r["ep"], []).append((r["start"], r["end"]))
+        if r["file"] in labeled:
+            continue
+        group_a.append({
+            "file": r["file"], "src": "candidates" if r["source"] == ms.SOURCE_CANDIDATE else "review",
+            "group": "A", "ep": r["ep"], "start": r["start"], "end": r["end"],
+            "dur": round(r["end"] - r["start"], 2),
+            "prob": r["prob"], "text": r["text"],
+        })
 
     encoder = EncoderClassifier.from_hparams(
         source="speechbrain/spkrec-ecapa-voxceleb", run_opts={"device": "cpu"})
@@ -79,7 +84,8 @@ def main():
     for label, _ in batch.find_episodes():
         if "." in label:
             continue
-        ep_dir = os.path.join(batch.BUILD_DIR, batch.ep_dir_name(label))
+        ep_name = ep_dir_name(label)
+        ep_dir = os.path.join(batch.BUILD_DIR, ep_name)
         kp = os.path.join(ep_dir, "kept.json")
         if not os.path.exists(kp):
             continue
@@ -96,9 +102,9 @@ def main():
             if p >= thr:
                 continue  # 已收录 (A 组)
             s, e = seg["start"], seg["end"]
-            if any(overlap(s, e, xs, xe) for xs, xe in exported.get(label, [])):
+            if any(overlap(s, e, xs, xe) for xs, xe in exported.get(ep_name, [])):
                 continue  # 与收录片段重叠 (重切子段), 不重复标注
-            if clip_name(label, s) in labeled:
+            if clip_name(ep_name, s) in labeled:
                 continue  # 已有定论
             entry = {"seg": seg, "prob": float(p)}
             if p >= B_LO:
@@ -115,7 +121,7 @@ def main():
             clip = resample_poly(cut_trim(va, sr_v, seg["start"], seg["end"]), 1, 2)
             if is_quiet(clip):
                 continue
-            name = clip_name(label, seg["start"])
+            name = clip_name(ep_name, seg["start"])
             sf.write(os.path.join(CLIPS_DIR, f"{name}.wav"), clip, 22050, subtype="PCM_16")
             entry = {"file": name, "src": "clips",
                      "group": "B" if p["prob"] >= B_LO else "C",
@@ -126,12 +132,12 @@ def main():
         print(f"  第{label}话 边界候选={len(b_cand)} 低分候选={len(c_cand)}", flush=True)
 
     clips = sorted(group_a + group_b + group_c, key=lambda x: (x["ep"], x["start"]))
-    with open(os.path.join("annotations", "clips.json"), "w", encoding="utf-8") as f:
-        json.dump(clips, f, ensure_ascii=False, indent=1)
+    clips_path = os.path.join("annotations", "clips.json")
+    ms.atomic_write_text(clips_path, json.dumps(clips, ensure_ascii=False, indent=1))
     total_dur = sum(c["dur"] for c in clips)
     print(f"\nA(复核)={len(group_a)}  B(边界)={len(group_b)}  C(抽查)={len(group_c)}"
           f"  共 {len(clips)} 段 / {total_dur / 60:.0f} 分钟音频")
-    print(f"清单: {os.path.join('annotations', 'clips.json')}")
+    print(f"清单: {clips_path}")
     print("下一步: .venv/bin/python pipeline/label_ui.py")
 
 

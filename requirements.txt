@@ -1,0 +1,18 @@
+# Chobits-Chii-Voice pipeline 依赖 (Python 3.12, 仅支持 macOS Apple Silicon)
+#
+# ⚠️ 以下版本未经本仓库 CI 验证, 安装后请人工确认可用
+#    最后人工确认日期: 2026-09-17
+#
+# 说明:
+#   - mlx-whisper / mlx 仅提供 Apple Silicon (arm64) wheel, 其他平台无法安装
+#   - demucs 以 `python -m demucs` 子进程方式调用, 需与 torch 版本兼容
+#   - ffmpeg 静态二进制由 imageio-ffmpeg 提供; 也可用系统 ffmpeg (加入 PATH 即可)
+numpy==2.2.6
+soundfile==0.13.1
+scipy==1.15.3
+torch==2.7.0
+demucs==4.0.1
+mlx-whisper==0.4.3
+speechbrain==1.0.2
+scikit-learn==1.6.1
+imageio-ffmpeg==0.5.1

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""把人工标注的片段嵌入成向量, 存 pilot/human_labels.npz (files/labels/embs).
+"""把人工标注的片段嵌入成向量, 存 annotations/human_labels.npz (files/labels/embs).
 
-A 组从 dataset/wavs/ 读, B/C 组从 dataset/labeling/clips/ 读 (均为 22050Hz),
+A 组从 build/candidates|review 读, B/C 组从 build/labeling/clips 读 (均为 22050Hz),
 重采样到 16k 后用 ECAPA 嵌入. 已存在则跳过 (增量: 只补新文件).
 
 用法: .venv/bin/python pipeline/embed_human_labels.py
@@ -16,13 +16,16 @@ from scipy.signal import resample_poly
 from speechbrain.inference.speaker import EncoderClassifier
 
 NPZ_PATH = os.path.join("annotations", "human_labels.npz")
+# 与 label_ui.py 的 AUDIO_DIRS 保持一致; "wavs" 兼容历史清单里 src=wavs 的条目
 DIRS = {"wavs": os.path.join("dataset", "wavs"),
-        "clips": os.path.join("dataset", "labeling", "clips")}
+        "candidates": os.path.join("build", "candidates"),
+        "review": os.path.join("build", "review"),
+        "clips": os.path.join("build", "labeling", "clips")}
 
 
 def main():
-    clips = {c["file"]: c for c in json.load(open("annotations/clips.json"))}
-    labels = json.load(open("annotations/labels.json"))
+    clips = {c["file"]: c for c in json.load(open("annotations/clips.json", encoding="utf-8"))}
+    labels = json.load(open("annotations/labels.json", encoding="utf-8"))
 
     old_files, old_labels, old_embs = [], [], np.zeros((0, 192))
     if os.path.exists(NPZ_PATH):

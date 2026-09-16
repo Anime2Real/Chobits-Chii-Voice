@@ -18,8 +18,12 @@ import webbrowser
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 LAB_DIR = "annotations"
+# 片段音频位置: candidates/review 由 batch.py 产出, clips 由 prepare_labeling.py 产出,
+# wavs 为 finalize.py 产物 (兼容历史清单里 src=wavs 的条目)
 AUDIO_DIRS = {"wavs": os.path.join("dataset", "wavs"),
-              "clips": os.path.join("dataset", "labeling", "clips")}
+              "candidates": os.path.join("build", "candidates"),
+              "review": os.path.join("build", "review"),
+              "clips": os.path.join("build", "labeling", "clips")}
 LABELS_PATH = os.path.join(LAB_DIR, "labels.json")
 
 INDEX_HTML = """<!doctype html>

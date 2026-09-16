@@ -15,3 +15,6 @@ __pycache__/
 
 # 人工标注工作目录 (临时音频, 可再生)
 /dataset/labeling/
+
+# 历史轮次的待复核片段 (batch.py 现在写到 build/review/, 此处防误提交)
+/dataset/review/
