@@ -94,7 +94,7 @@ with open("dataset/metadata.csv", encoding="utf-8") as f:
 6. **人工标注**：两轮交互式标注（`label_ui.py` 浏览器工具，快捷键打标），共 1150 条，覆盖分类器边界区与低分区抽查；最终导出前对全部收录片段人工复听一遍
 7. **导出**：能量谷修剪切边、统一转 22050Hz（`finalize.py`）
 
-数据一致性校验：`python tools/validate.py`（CI 已接入）会对 `dataset/` 与 `annotations/labels.json` 做结构断言（两表文件集合/行数一致、标签覆盖与合法性、字段与内容寻址命名、transcripts 24 话覆盖与 `in_dataset` 互查，失败即非零退出），并将实测片段数/总时长/标签数与 README 声明比对（不符仅警告）。
+数据一致性校验：`python tools/validate.py`（CI 已配置，需手动触发 workflow_dispatch：仓库页 Actions → CI → Run workflow）会对 `dataset/` 与 `annotations/labels.json` 做结构断言（两表文件集合/行数一致、标签覆盖与合法性、字段与内容寻址命名、transcripts 24 话覆盖与 `in_dataset` 互查，失败即非零退出），并将实测片段数/总时长/标签数与 README 声明比对（不符仅警告）。
 
 ### 纯度说明
 
@@ -108,7 +108,7 @@ Chobits-Chii-Voice/
 ├── README.md               # 本文件 (数据集卡片)
 ├── requirements.txt        # pipeline 依赖锁定 (Python 3.12, 仅 macOS Apple Silicon)
 ├── tests/                  # metadata_schema / validate 单元测试 (纯标准库 unittest)
-├── tools/                  # 数据一致性校验 validate.py (纯标准库, CI 接入)
+├── tools/                  # 数据一致性校验 validate.py (纯标准库, CI 手动触发)
 ├── dataset/                # 最终数据集 (见上)
 ├── annotations/            # 人工标注资产
 │   ├── labels.json             # 1150 条人工标签 {文件名: chi/not_chi/mixed/bad/unsure}
