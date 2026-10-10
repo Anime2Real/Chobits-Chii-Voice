@@ -78,7 +78,12 @@ def main():
         labels = json.load(f)
 
     with open("annotations/chi_lr.pkl", "rb") as f:
-        clf = pickle.load(f)["model"]
+        scorer = pickle.load(f)
+    clf = scorer["model"]
+    # 收录线取模型自带的校准阈值 (prepare_labeling.py 同口径): 两边阈值必须一致,
+    # 否则 [pkl_thr, THR_AUTO) 区间的 chunk 既不进标注清单 (被当作"已收录"),
+    # 也不被这里收录, 静默丢失。pkl 无该字段时才回退常量。
+    thr_auto = scorer.get("threshold", THR_AUTO)
     encoder = EncoderClassifier.from_hparams(
         source="speechbrain/spkrec-ecapa-voxceleb", run_opts={"device": "cpu"})
 
@@ -181,7 +186,7 @@ def main():
         ep_name = ep_dir_name(label)
 
         for seg, p in zip((chunks[i] for i in idx), probs):
-            if p < THR_AUTO or clip_name(ep_name, seg["start"]) in labels:
+            if p < thr_auto or clip_name(ep_name, seg["start"]) in labels:
                 continue
             pieces = [(seg["start"], seg["end"])]
             if seg["end"] - seg["start"] >= RESPLIT_DUR:
@@ -198,7 +203,7 @@ def main():
                 if is_quiet(pclip):
                     continue
                 if len(pieces) > 1:
-                    if float(clf.predict_proba(embed(pclip).reshape(1, -1))[0, 1]) < THR_AUTO:
+                    if float(clf.predict_proba(embed(pclip).reshape(1, -1))[0, 1]) < thr_auto:
                         continue
                     text = transcribe(pclip) or seg["text"]
                 else:

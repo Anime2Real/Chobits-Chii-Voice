@@ -25,6 +25,9 @@ AUDIO_DIRS = {"wavs": os.path.join("dataset", "wavs"),
               "review": os.path.join("build", "review"),
               "clips": os.path.join("build", "labeling", "clips")}
 LABELS_PATH = os.path.join(LAB_DIR, "labels.json")
+# 与前端 LABEL_NAMES / 快捷键一致; do_POST 用它挡住脏值
+# (labels.json 里非枚举值既不会被 finalize 当 chi 收录, 又让片段永久退出标注)
+VALID_LABELS = {"chi", "not_chi", "mixed", "bad", "unsure"}
 
 INDEX_HTML = """<!doctype html>
 <html lang="zh"><head><meta charset="utf-8"><title>小叽语音标注</title>
@@ -210,11 +213,15 @@ class Handler(BaseHTTPRequestHandler):
             self._send(404, "{}")
             return
         body = json.loads(self.rfile.read(int(self.headers["Content-Length"])))
+        name, label = body.get("file"), body.get("label")
+        if not isinstance(name, str) or not name or label not in VALID_LABELS:
+            self._send(400, "{}")
+            return
         labels = {}
         if os.path.exists(LABELS_PATH):
             with open(LABELS_PATH, encoding="utf-8") as f:
                 labels = json.load(f)
-        labels[body["file"]] = body["label"]
+        labels[name] = label
         tmp = LABELS_PATH + ".tmp"
         with open(tmp, "w", encoding="utf-8") as f:
             json.dump(labels, f, ensure_ascii=False, indent=1)
