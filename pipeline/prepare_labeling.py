@@ -125,7 +125,7 @@ def main():
             sf.write(os.path.join(CLIPS_DIR, f"{name}.wav"), clip, 22050, subtype="PCM_16")
             entry = {"file": name, "src": "clips",
                      "group": "B" if p["prob"] >= B_LO else "C",
-                     "ep": label, "start": round(seg["start"], 2), "end": round(seg["end"], 2),
+                     "ep": ep_name, "start": round(seg["start"], 2), "end": round(seg["end"], 2),
                      "dur": round(seg["end"] - seg["start"], 2),
                      "prob": round(p["prob"], 3), "text": seg["text"]}
             (group_b if entry["group"] == "B" else group_c).append(entry)

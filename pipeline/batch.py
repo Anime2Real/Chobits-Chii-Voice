@@ -27,6 +27,7 @@ import os
 import re
 import shutil
 import subprocess
+import sys
 
 import mlx_whisper
 import numpy as np
@@ -106,7 +107,7 @@ def prepare_episode(ep_no, mp4_path, ep_dir):
         subprocess.run([ffmpeg_exe(), "-y", "-hide_banner", "-loglevel", "error",
                         "-i", mp4_path, "-vn", "-ac", "2", "-ar", "44100", audio], check=True)
     if not os.path.exists(vocals):
-        subprocess.run([".venv/bin/python", "-m", "demucs", "--two-stems=vocals",
+        subprocess.run([sys.executable, "-m", "demucs", "--two-stems=vocals",
                         "-n", "htdemucs", "--device", DEVICE,
                         "--out", os.path.join(ep_dir, "separated"), audio], check=True)
     if not os.path.exists(vocals16k):
