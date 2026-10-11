@@ -15,7 +15,7 @@ pretty_name: Chobits-Chii-Voice
 ---
 
 <div align="center">
-	<h1>Chobits</h1>
+	<h1>Chobits-Chii-Voice</h1>
 	<p><b>叽～</b> 小叽的语音数据集</p>
 	<p>《人形电脑天使心》(Chobits) 小叽角色的日语语音数据集，可用于语音合成 (TTS)、声音克隆等任务的训练与微调。</p>
 	<p>
@@ -32,11 +32,11 @@ pretty_name: Chobits-Chii-Voice
 
 > 💖 如果这个项目对你有帮助，欢迎在 [GitHub](https://github.com/Anime2Real/Chobits-Chii-Voice) 点个 Star、在 [Hugging Face](https://huggingface.co/datasets/chenxin199305/Chobits-Chii-Voice) 点个 Like —— 你的支持能让更多人发现小叽！
 
-《人形电脑天使心》(Chobits) 中 **小叽 (Chi / ちぃ)** 角色的语音数据集，可用于语音合成 (TTS)、声音克隆等任务的训练与微调。
+> ⚠️ 注意：原始动画音频的版权归其权利方所有。本数据集仅供学习与研究使用，请勿用于商业用途。
+
+《人形电脑天使心》(Chobits) 中 **小叽 (Chii / ちぃ)** 角色的语音数据集，可用于语音合成 (TTS)、声音克隆等任务的训练与微调。
 
 本数据集从《Chobits》TV 动画全 24 话（总集篇除外）的音轨中提取角色**小叽**（CV: 田中理惠）的语音片段，经人声分离、语音识别切分、说话人嵌入分类，并经过**两轮人工标注（共 1150 条）+ 最终全量人工复听**筛选而成。
-
-> ⚠️ 注意：原始动画音频的版权归其权利方所有。本数据集仅供学习与研究使用，请勿用于商业用途。
 
 ## 📊 数据统计
 
@@ -194,3 +194,10 @@ AWS_CONFIG_FILE=$PWD/.dvc/aws_config dvc pull
   howpublished = {\url{https://huggingface.co/datasets/chenxin199305/Chobits-Chii-Voice}}
 }
 ```
+
+## 🙏 相关项目
+
+- [Chobits-Chii-TTS](https://github.com/Anime2Real/Chobits-Chii-TTS) — 小叽声线 TTS（GPT-SoVITS / CosyVoice 两方案，本数据集是其训练数据来源）
+- [Chobits-Chii-ASR](https://github.com/Anime2Real/Chobits-Chii-ASR) — 语音识别服务（批量 + 流式，以本数据集为评测数据来源）
+- [Chobits-Chii-Mascot](https://github.com/Anime2Real/Chobits-Chii-Mascot) — 桌面端桌宠客户端（Electron，Live2D / 视频精灵双渲染）
+- [Chobits-Chii-Pipecat](https://github.com/Anime2Real/Chobits-Chii-Pipecat) — 实时语音对话 pipeline 编排
