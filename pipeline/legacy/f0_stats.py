@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """F0(基频)分析: 统计给定目录下 wav 的中位基频分布, 用于男女声筛选.
 
-用法: .venv/bin/python pipeline/f0_stats.py dataset/wavs dataset/review
+用法: .venv/bin/python pipeline/legacy/f0_stats.py dataset/wavs dataset/review
 """
 import csv
 import glob

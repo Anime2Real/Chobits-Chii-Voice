@@ -7,7 +7,7 @@
   3. 打分: sim = 与 chi_reference_v4 相似度; margin = sim - 77 条负样本最近邻
   4. 两段式: >=4s 收录片段能量谷重切, 子片段重打分 + 重转写
 
-用法: .venv/bin/python pipeline/round7.py
+用法: .venv/bin/python pipeline/legacy/round7.py
 """
 import csv
 import json

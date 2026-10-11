@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """用人工确认的候选片段构建小叽参考向量, 并用它重新打分验证分离度.
 
-用法: .venv/bin/python pipeline/07_make_reference.py pilot/ep01/clusters pilot/ep01/chi_candidates/candidates.json pilot/chi_reference.npy 0 1 2 3 4 6 7 8
+用法: .venv/bin/python pipeline/legacy/07_make_reference.py pilot/ep01/clusters pilot/ep01/chi_candidates/candidates.json pilot/chi_reference.npy 0 1 2 3 4 6 7 8
 """
 import json
 import sys

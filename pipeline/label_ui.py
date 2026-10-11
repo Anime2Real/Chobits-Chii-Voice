@@ -115,16 +115,23 @@ function show() {
   document.getElementById('progress').textContent =
     `进度 ${done} / ${clips.length} (第 ${idx + 1} 条)`;
   document.querySelector('#bar > div').style.width = (100 * done / clips.length) + '%';
-  document.querySelectorAll('.item').forEach((el, i) =>
-    el.classList.toggle('active', i === idx));
+  document.querySelectorAll('.item').forEach(el =>
+    el.classList.toggle('active', +el.dataset.i === idx));
   const act = document.querySelector('.item.active');
   if (act) act.scrollIntoView({block: 'nearest'});
 }
 
 function setLabel(v) {
   const c = clips[idx];
+  const prev = labels[c.file];
   labels[c.file] = v;
-  fetch('/label', {method: 'POST', body: JSON.stringify({file: c.file, label: v})});
+  fetch('/label', {method: 'POST', body: JSON.stringify({file: c.file, label: v})})
+    .then(r => {
+      if (r.ok) return;
+      if (prev === undefined) delete labels[c.file]; else labels[c.file] = prev;
+      alert('保存失败 (HTTP ' + r.status + '), 已撤销: ' + c.file);
+      show(); renderList();
+    });
   show(); renderList();
   if (idx < clips.length - 1) { idx++; show(); renderList(); }
 }
@@ -144,6 +151,7 @@ function renderList() {
     if (l) cnt[l]++;
     if (onlyUn && l) return;
     const div = document.createElement('div');
+    div.dataset.i = i;
     div.className = 'item' + (l ? ' l-' + l : '') + (i === idx ? ' active' : '');
     div.textContent = (l ? LABEL_NAMES[l] + ' | ' : '') + c.file + ' ' + (c.text || '');
     div.onclick = () => { idx = i; show(); };

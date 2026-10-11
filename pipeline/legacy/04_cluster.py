@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """说话人聚类: 对每个 segment 提取 ECAPA-TDNN embedding, 凝聚聚类.
 
-用法: .venv/bin/python pipeline/04_cluster.py pilot/ep01/vocals_16k.wav pilot/ep01/segments.json pilot/ep01/clusters
+用法: .venv/bin/python pipeline/legacy/04_cluster.py pilot/ep01/vocals_16k.wav pilot/ep01/segments.json pilot/ep01/clusters
 输出: clusters/assignments.json, clusters/cluster_<id>/sample_<i>.wav (每类最多 5 个试听样本)
 """
 import json

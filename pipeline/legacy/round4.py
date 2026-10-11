@@ -11,7 +11,7 @@
 
 注意: v4 参考向量留待 dataset/labeling/ 人工标注完成后构建(见 README/会话), 本轮沿用 v2+判别.
 
-用法: .venv/bin/python pipeline/round4.py
+用法: .venv/bin/python pipeline/legacy/round4.py
 """
 import csv
 import json

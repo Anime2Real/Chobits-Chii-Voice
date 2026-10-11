@@ -11,7 +11,7 @@
 打分: sim = 与 chi_reference_v4 相似度; margin = sim - 负样本池最近邻相似度
 收录: sim >= T1 且 margin >= MARGIN
 
-用法: .venv/bin/python pipeline/round6.py
+用法: .venv/bin/python pipeline/legacy/round6.py
 """
 import csv
 import json

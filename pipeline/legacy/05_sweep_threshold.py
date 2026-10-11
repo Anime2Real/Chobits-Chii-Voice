@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """聚类阈值扫描: 观察不同 cosine 距离阈值下的聚类粒度.
 
-用法: .venv/bin/python pipeline/05_sweep_threshold.py pilot/ep01/clusters
+用法: .venv/bin/python pipeline/legacy/05_sweep_threshold.py pilot/ep01/clusters
 """
 import json
 import sys

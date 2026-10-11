@@ -5,10 +5,11 @@
   1. annotations/labels.json 中标记为 chi 的片段
      (音频在 build/candidates, build/review 和 build/labeling/clips,
      重转写文本); 同集重叠 >50% 的去重, 保留更长者
-  2. 未被人工标注、LR 概率 >= THR_AUTO 的新 chunk (>=4s 能量谷重切 + 重打分 + 重转写),
+  2. 未被人工标注、LR 概率 >= 收录阈值的新 chunk (>=4s 能量谷重切 + 重打分 + 重转写),
+     收录阈值取 annotations/chi_lr.pkl 的校准阈值 (pkl 无该字段时才回退 THR_AUTO),
      与人工确认片段重叠 >50% 的跳过
 
-依赖 batch.py 在 build/ 下的中间产物 (kept.json / 分轨 / metadata_full.csv).
+依赖 batch.py 在 build/ 下的中间产物 (kept.json / vocals_16k.wav / separated 分轨).
 
 产出 (dataset/ 下唯一的写入入口, 全部原子写出):
   dataset/wavs/             22050Hz 16bit 单声道, 内容寻址命名
@@ -119,11 +120,12 @@ def main():
         """从 build/ 重建缺失片段: 找包含 start 的 chunk, 能量谷重切取起点最近的子段."""
         if ep_name not in ep_cache:
             ep_dir = os.path.join(batch.BUILD_DIR, ep_name)
-            with open(os.path.join(ep_dir, "chunks_1.0_10.0.json"), encoding="utf-8") as f:
-                chunks = json.load(f)
+            with open(os.path.join(ep_dir, "kept.json"), encoding="utf-8") as f:
+                kept = json.load(f)
             a16, s16 = sf.read(os.path.join(ep_dir, "vocals_16k.wav"))
             v, sv = sf.read(os.path.join(ep_dir, "separated", "htdemucs", "audio", "vocals.wav"),
                             dtype="float32")
+            chunks = get_chunks(ep_dir, kept, a16, s16, MIN_DUR, MAX_DUR)
             ep_cache[ep_name] = (chunks, a16, s16, v, sv)
         chunks, a16, s16, v, sv = ep_cache[ep_name]
         c = min(chunks, key=lambda c: abs(c["start"] - start))

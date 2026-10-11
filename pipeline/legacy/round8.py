@@ -7,7 +7,7 @@
   2. >10s 且词级拆分失败的长句: 能量谷兜底切分, 不再直接丢弃
   3. F0 特征 (CREPE 中位数/四分位/周期性) 按集缓存, 仅当模型需要时计算
 
-用法: .venv/bin/python pipeline/round8.py
+用法: .venv/bin/python pipeline/legacy/round8.py
 """
 import csv
 import json

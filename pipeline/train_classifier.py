@@ -72,8 +72,7 @@ def main():
         if prec >= PREC_TARGET and (best is None or rec > best[1]):
             best = (thr, rec)
             mark = "  <-- 候选"
-        if thr * 100 % 10 < 2:
-            print(f"{thr:.2f}  {prec:.3f}   {rec:.3f}{mark}")
+        print(f"{thr:.2f}  {prec:.3f}   {rec:.3f}{mark}")
     thr = round(float(best[0]), 2) if best else 0.90
     print(f"\n选定阈值 {thr} (目标精确率>={PREC_TARGET})")
 

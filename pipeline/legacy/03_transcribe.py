@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """ASR 转写: mlx-whisper large-v3-turbo, 日语, 输出带时间戳的 segments JSON.
 
-用法: .venv/bin/python pipeline/03_transcribe.py pilot/ep01/vocals_16k.wav pilot/ep01/segments.json
+用法: .venv/bin/python pipeline/legacy/03_transcribe.py pilot/ep01/vocals_16k.wav pilot/ep01/segments.json
 """
 import json
 import sys

@@ -4,7 +4,7 @@
 思路: 收集文本恰为"ちい/チー"类独白的 segments, 平均其 embedding 得到小叽参考向量,
 对全部 segments 算 cosine 相似度, 导出 top-N 试听片段.
 
-用法: .venv/bin/python pipeline/06_chi_bootstrap.py pilot/ep01/clusters pilot/ep01/vocals_16k.wav pilot/ep01/chi_candidates [topn]
+用法: .venv/bin/python pipeline/legacy/06_chi_bootstrap.py pilot/ep01/clusters pilot/ep01/vocals_16k.wav pilot/ep01/chi_candidates [topn]
 """
 import json
 import os

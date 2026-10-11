@@ -20,7 +20,7 @@ def is_quiet(y):
 
 
 def split_long(seg, audio16k, sr):
-    """用词级时间戳把 >10s 的段切成 2-10s 小块, 返回绝对时间的 chunk 列表."""
+    """用词级时间戳把 >10s 的段切成 1-10s 小块, 返回绝对时间的 chunk 列表."""
     s0, e0 = int(seg["start"] * sr), int(seg["end"] * sr)
     window = audio16k[s0:e0].astype("float32")
     result = mlx_whisper.transcribe(

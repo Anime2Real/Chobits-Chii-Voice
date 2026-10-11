@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # 人声分离: demucs htdemucs, 只保留 vocals 轨
-# 用法: pipeline/02_separate.sh pilot/ep01/audio.wav pilot/ep01
+# 用法: pipeline/legacy/02_separate.sh pilot/ep01/audio.wav pilot/ep01
 set -euo pipefail
 
 IN="$1"

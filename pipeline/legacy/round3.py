@@ -9,7 +9,7 @@
 
 另导出 dataset/labeling/ : 30 条跨剧集分层抽样候选, 供人工确认后构建 v4 参考.
 
-用法: .venv/bin/python pipeline/round3.py
+用法: .venv/bin/python pipeline/legacy/round3.py
 """
 import csv
 import json

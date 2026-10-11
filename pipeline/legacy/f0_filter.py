@@ -6,7 +6,7 @@
   dataset/wavs/   中的男声 -> dataset/wavs_lowpitch/ (不删除, 人工决定), 并从 metadata.csv 移除对应行
 F0 明细写 dataset/f0_crepe.csv
 
-用法: .venv/bin/python pipeline/f0_filter.py
+用法: .venv/bin/python pipeline/legacy/f0_filter.py
 """
 import csv
 import glob

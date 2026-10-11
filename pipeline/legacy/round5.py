@@ -12,7 +12,7 @@
 
 chunk 与 embedding 按集缓存(build/epXX/chunks.json / chunk_embeddings.npy), 重跑快.
 
-用法: .venv/bin/python pipeline/round5.py
+用法: .venv/bin/python pipeline/legacy/round5.py
 """
 import csv
 import json

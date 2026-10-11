@@ -7,7 +7,7 @@
   3. 参考向量 v2 = 第一轮 sim>=REF_SIM 且时长>=REF_DUR 的片段 embedding 均值
   4. 全量重打分, >=T1 收录进 dataset/, [T2,T1) 进 dataset/review/
 
-用法: .venv/bin/python pipeline/round2.py
+用法: .venv/bin/python pipeline/legacy/round2.py
 """
 import csv
 import json
