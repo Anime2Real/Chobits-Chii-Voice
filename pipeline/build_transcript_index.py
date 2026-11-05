@@ -3,7 +3,7 @@
 
 每行一句 whisper 转写台词 (OP/ED 已剔除), 附带:
   chi_prob   句内所有 chunk 的小叽分类概率最大值 (可粗略判断是谁说的)
-  in_dataset 该句是否有片段入选最终数据集 (build/metadata_full.csv)
+  in_dataset 该句是否有片段入选最终数据集 (dataset/metadata_full.csv)
 
 用途: 全文检索"是否说过某句话", 并定位到集数和时间.
   例: grep 'ちい' dataset/transcripts.csv
@@ -33,10 +33,14 @@ def main():
     encoder = EncoderClassifier.from_hparams(
         source="speechbrain/spkrec-ecapa-voxceleb", run_opts={"device": "cpu"})
 
-    # 已收录片段区间, 用于 in_dataset 标记
-    meta_path = os.path.join(batch.BUILD_DIR, "metadata_full.csv")
+    # 已收录片段区间, 用于 in_dataset 标记。
+    # 必须用 dataset/metadata_full.csv —— 那是 finalize 产出的人工确认结果；
+    # build/metadata_full.csv 是人工筛选之前的候选池（同时含 candidate 与 review 行），
+    # 用它会把「只当过候选、后来被人工否掉」的句子标成入选，而「仅在 review 带内、
+    # 被人工确认收录」的句子标成未入选
+    meta_path = os.path.join(batch.OUT_DIR, "metadata_full.csv")
     if not os.path.exists(meta_path):
-        raise SystemExit(f"找不到 {meta_path}, 请先运行: .venv/bin/python pipeline/batch.py")
+        raise SystemExit(f"找不到 {meta_path}, 请先运行: .venv/bin/python pipeline/finalize.py")
     exported = {}
     for r in ms.read_metadata_full(meta_path):
         exported.setdefault(r["ep"], []).append((r["start"], r["end"]))
