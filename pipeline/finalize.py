@@ -59,8 +59,15 @@ def overlap(a_start, a_end, b_start, b_end):
 
 
 def find_src(file):
-    """按优先级探测人工片段的音频位置, 找不到返回 None (走 build/ 重建)."""
+    """按优先级探测人工片段的音频位置, 找不到返回 None (走 build/ 重建).
+
+    dataset/wavs 自身必须排除：main() 先 rmtree 再逐个写出，命中它就等于「读一个
+    即将被自己删掉的文件」——清空之后才 sf.read，FileNotFoundError 且数据已丢。
+    历史清单里的 src=wavs 条目因此一律走 build/ 重建（与 97-98 行注释的意图一致）。"""
+    published = os.path.abspath(os.path.join(OUT_DIR, "wavs"))
     for src, d in SRC_DIRS.items():
+        if os.path.abspath(d) == published:
+            continue
         if os.path.exists(os.path.join(d, file + ".wav")):
             return src
     return None

@@ -304,7 +304,10 @@ def _load_transcripts(path):
         for lineno, vals in enumerate(reader, start=2):
             if not vals or all(v == "" for v in vals):
                 continue
-            row = dict(zip(TRANSCRIPT_FIELDS, vals))
+            # 先补全键：截断的行少了字段时，下游 r["ep"] 会抛 KeyError 直接崩掉
+            # 整个报告（本工具的约定是「有问题就 [FAIL] 并退出码 1」）
+            row = dict.fromkeys(TRANSCRIPT_FIELDS, "")
+            row.update(zip(TRANSCRIPT_FIELDS, vals))
             row["_lineno"] = lineno
             rows.append(row)
     return rows

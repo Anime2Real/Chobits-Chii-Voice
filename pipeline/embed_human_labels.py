@@ -33,7 +33,15 @@ def main():
         old_files, old_labels, old_embs = z["files"].tolist(), z["labels"].tolist(), z["embs"]
     done = set(old_files)
     todo = [(f, labels[f]) for f in labels if f not in done and f in clips]
-    print(f"已缓存 {len(done)} 条, 新增 {len(todo)} 条")
+    # labels.json 才是真相源：label_ui 允许随时改判已缓存片段（unsure→not_chi 等），
+    # 只补新条目会让训练集沿用首次嵌入时的旧标签且毫无提示
+    refreshed = 0
+    for i, f in enumerate(old_files):
+        want = labels.get(f)
+        if want is not None and want != old_labels[i]:
+            old_labels[i] = want
+            refreshed += 1
+    print(f"已缓存 {len(done)} 条, 新增 {len(todo)} 条" + (f", 同步改判 {refreshed} 条" if refreshed else ""))
 
     embs = list(old_embs)
     if todo:
@@ -44,8 +52,10 @@ def main():
             wav, sr = sf.read(os.path.join(DIRS[c["src"]], f + ".wav"), dtype="float32")
             clip16 = resample_poly(wav, 16000, sr)  # 22050 -> 16000
             with torch.no_grad():
+                # resample_poly 会把结果提升到 float64（scipy gh-7342），而 ECAPA 前端
+                # 缓冲区是 float32：不显式回落会与其它嵌入路径不同源
                 e = encoder.encode_batch(
-                    torch.tensor(clip16).unsqueeze(0)).squeeze().cpu().numpy()
+                    torch.tensor(clip16, dtype=torch.float32).unsqueeze(0)).squeeze().cpu().numpy()
             embs.append(e / (np.linalg.norm(e) + 1e-8))
             old_files.append(f)
             old_labels.append(lab)

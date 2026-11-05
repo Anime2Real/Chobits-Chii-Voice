@@ -131,6 +131,12 @@ function setLabel(v) {
       if (prev === undefined) delete labels[c.file]; else labels[c.file] = prev;
       alert('保存失败 (HTTP ' + r.status + '), 已撤销: ' + c.file);
       show(); renderList();
+    })
+    .catch(e => {
+      // 连接被服务端异常断开时 then 根本不执行：没有这条 catch，界面会一直显示已保存
+      if (prev === undefined) delete labels[c.file]; else labels[c.file] = prev;
+      alert('保存失败 (' + e + '), 已撤销: ' + c.file);
+      show(); renderList();
     });
   show(); renderList();
   if (idx < clips.length - 1) { idx++; show(); renderList(); }
@@ -220,20 +226,38 @@ class Handler(BaseHTTPRequestHandler):
         if self.path.split("?")[0] != "/label":
             self._send(404, "{}")
             return
-        body = json.loads(self.rfile.read(int(self.headers["Content-Length"])))
+        # 任何异常都必须回一个 HTTP 响应：BaseHTTPRequestHandler 直接抛会断连无响应，
+        # 前端 fetch 走 reject 分支，界面显示已保存而 labels.json 其实没落盘
+        try:
+            length = int(self.headers.get("Content-Length") or 0)
+            body = json.loads(self.rfile.read(length))
+            if not isinstance(body, dict):
+                raise ValueError("body 不是对象")
+        except (ValueError, TypeError):
+            self._send(400, "{}")
+            return
         name, label = body.get("file"), body.get("label")
         if not isinstance(name, str) or not name or label not in VALID_LABELS:
             self._send(400, "{}")
             return
-        labels = {}
-        if os.path.exists(LABELS_PATH):
-            with open(LABELS_PATH, encoding="utf-8") as f:
-                labels = json.load(f)
-        labels[name] = label
-        tmp = LABELS_PATH + ".tmp"
-        with open(tmp, "w", encoding="utf-8") as f:
-            json.dump(labels, f, ensure_ascii=False, indent=1)
-        os.replace(tmp, LABELS_PATH)
+        tmp = None
+        try:
+            labels = {}
+            if os.path.exists(LABELS_PATH):
+                with open(LABELS_PATH, encoding="utf-8") as f:
+                    labels = json.load(f)
+            labels[name] = label
+            # 固定名 .tmp 在 ThreadingHTTPServer 下会被并发 POST 互相踩（os.replace
+            # 找不到文件），用 pid+tid 唯一化
+            tmp = f"{LABELS_PATH}.tmp.{os.getpid()}.{threading.get_ident()}"
+            with open(tmp, "w", encoding="utf-8") as f:
+                json.dump(labels, f, ensure_ascii=False, indent=1)
+            os.replace(tmp, LABELS_PATH)
+        except (OSError, ValueError):
+            if tmp is not None and os.path.exists(tmp):
+                os.remove(tmp)
+            self._send(500, "{}")
+            return
         self._send(200, "{}")
 
 

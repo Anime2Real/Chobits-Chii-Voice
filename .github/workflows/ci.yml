@@ -20,6 +20,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        # *.pkl / *.npz / *.npy 走 git-lfs：不拉 LFS 时 checkout 出来的是 130 字节指针文件
+        with:
+          lfs: true
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
