@@ -22,7 +22,7 @@ pretty_name: Chobits-Chii-Voice
 		<a href="https://madewithlove.org.in"><img alt="Made with Love" src="https://img.shields.io/badge/Made%20with-Love-ff69b4.svg"></a>
 		<a href="https://github.com/Anime2Real/Chobits-Chii-Voice"><img alt="GitHub" src="https://img.shields.io/badge/GitHub-Chobits--Chii--Voice-181717?logo=github"></a>
 		<a href="https://huggingface.co/datasets/chenxin199305/Chobits-Chii-Voice"><img alt="Hugging Face Dataset" src="https://img.shields.io/badge/%F0%9F%A4%97%20Dataset-Chobits--Chii--Voice-yellow"></a>
-		<a href="https://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="License: CC BY-NC-SA 4.0" src="https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg"></a>
+		<a href="LICENSE"><img alt="License: CC BY-NC-SA 4.0" src="https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg"></a>
 	</p>
 	<p>
 		<img alt="Language: Japanese" src="https://img.shields.io/badge/Language-Japanese-green.svg" />
@@ -169,11 +169,15 @@ AWS_CONFIG_FILE=$PWD/.dvc/aws_config dvc pull
 
 ## 📄 许可协议
 
-本数据集以 [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh-hans)（署名-非商业性使用-相同方式共享）协议发布：
+本数据集采用 **CC BY-NC-SA 4.0**，仅限非商业用途。
 
+- **许可全文**：见 [LICENSE](./LICENSE)。
 - **署名 (BY)**：使用时须注明数据集来源。
-- **非商业性使用 (NC)**：不得将本数据集用于商业目的。
-- **相同方式共享 (SA)**：基于本数据集的衍生作品须以相同协议发布。
+- **非商业性使用 (NC)**：不得用于商业目的。
+- **相同方式共享 (SA)**：衍生作品须以相同协议发布。
+- **覆盖范围**：仅覆盖 Anime2Real 的标注、转写、筛选和元数据；原始动画音频、角色 IP、声优权利不在授权范围内，见 [DATASET-TERMS.md](./DATASET-TERMS.md)。
+- **商业使用**：需要单独授权，见 [COMMERCIAL.md](./COMMERCIAL.md)。
+- **第三方权利**：见 [NOTICE](./NOTICE)。
 
 ## ⚠️ 免责声明
 
